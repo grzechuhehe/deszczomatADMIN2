@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.util.List;
+
 @Entity
 @Data
 @AllArgsConstructor
@@ -18,6 +20,8 @@ public class User{
     @Column(unique = true, nullable = false)
     private String username;
     @Column(unique = true, nullable = false)
-    private String hashed_password;
+    private String hashedPassword;
     private String role;
+    @OneToMany(mappedBy = "owner")
+    private List<Device> devices;
 }

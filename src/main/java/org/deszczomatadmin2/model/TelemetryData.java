@@ -1,7 +1,6 @@
 package org.deszczomatadmin2.model;
 
 import jakarta.persistence.*;
-import jdk.jfr.StackTrace;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -11,14 +10,13 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@Getter
-@Setter
 public class TelemetryData{
     @Id
     @GeneratedValue
     private Long id;
-    @OneToMany
-    private Long deviceId;
+    @ManyToOne
+    @JoinColumn(name = "device_id")
+    private Device device;
     private String payload;
     private LocalDateTime timestamp;
 
