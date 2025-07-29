@@ -1,13 +1,8 @@
 package org.deszczomatadmin2.model;
 
 import jakarta.persistence.*;
-import lombok.*;
 
 @Entity
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
-
 public class Device{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,9 +13,7 @@ public class Device{
     @JoinColumn(name = "user_id", nullable = false)
     private User owner;
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
 
     public void setId(Long id) {
         this.id = id;
@@ -34,9 +27,7 @@ public class Device{
         this.deviceId = deviceId;
     }
 
-    public User getOwner() {
-        return owner;
-    }
+    public User getOwner() { return owner; }
 
     public void setOwner(User owner) {
         this.owner = owner;

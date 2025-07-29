@@ -1,35 +1,32 @@
 package org.deszczomatadmin2.model;
 
 import jakarta.persistence.*;
-import lombok.*;
+
 
 import java.time.LocalDateTime;
 
 @Entity
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
 public class Command {
-    @Getter
+
     @Id
     @GeneratedValue
     private Long id;
-    @Getter
+
     @ManyToOne
-    @JoinColumn(name = "device_id" , nullable = false)
+    @JoinColumn(name = "device_id", nullable = false)
     private Device device;
+
     private String commandPayload;
+
     private boolean executed = false;
-    //TODO - ATRYBUT CZY KOMENDA JEST WYKONANA(WAS SENT)
-    //TODO - ATRYBUT LICZNIK PONOWIEŃ WYSŁANIA(INKRETMENTALNY) -
+
+    private int retryCount = 0;
+
     private LocalDateTime createdAt;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
     }
 
     public Device getDevice() {
@@ -40,11 +37,21 @@ public class Command {
         this.device = device;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getCommandPayload() {
         return commandPayload;
     }
 
-    public void setCommandPayload(String commandPayload) { this.commandPayload = commandPayload; }
+    public void setCommandPayload(String commandPayload) {
+        this.commandPayload = commandPayload;
+    }
 
     public boolean isExecuted() {
         return executed;
@@ -52,6 +59,14 @@ public class Command {
 
     public void setExecuted(boolean executed) {
         this.executed = executed;
+    }
+
+    public int getRetryCount() {
+        return retryCount;
+    }
+
+    public void setRetryCount(int retryCount) {
+        this.retryCount = retryCount;
     }
 
     public LocalDateTime getCreatedAt() {

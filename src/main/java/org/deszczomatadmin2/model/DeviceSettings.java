@@ -1,17 +1,10 @@
 package org.deszczomatadmin2.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+
 
 @Entity
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-public class DeviceSettings{
+public class DeviceSettings {
     @Id
     @GeneratedValue
     private Long id;
@@ -21,9 +14,7 @@ public class DeviceSettings{
     private Double speedLimit;
     private boolean speedChangedPending;
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
 
     public void setId(Long id) {
         this.id = id;
