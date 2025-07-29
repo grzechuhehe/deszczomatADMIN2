@@ -20,6 +20,8 @@ public class Command {
     private Device device;
     private String commandPayload;
     private boolean executed = false;
+    //TODO - ATRYBUT CZY KOMENDA JEST WYKONANA(WAS SENT)
+    //TODO - ATRYBUT LICZNIK PONOWIEŃ WYSŁANIA(INKRETMENTALNY) -
     private LocalDateTime createdAt;
 
     public Long getId() {

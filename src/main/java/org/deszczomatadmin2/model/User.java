@@ -15,10 +15,10 @@ import java.util.List;
 public class User{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long user_id;
     @Column(unique = true, nullable = false)
     private String username;
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     @Getter
     private String hashedPassword;
     private String role;
@@ -26,11 +26,11 @@ public class User{
     private List<Device> devices;
 
     public Long getId() {
-        return id;
+        return user_id;
     }
 
     public void setId(Long id) {
-        this.id = id;
+        this.user_id     = id;
     }
 
     public String getUsername() {

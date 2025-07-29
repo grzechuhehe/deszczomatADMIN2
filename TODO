@@ -1,0 +1,22 @@
+POST /telemetry/device-sync HTTP/1.1
+Host: 192.168.0.6:1800
+Content-Type: application/json
+Content-Length: 81
+
+{"username":"ADMIN1","password":"PASSWORD","deviceId":"1","payload":"HelloWorld"}
+HTTP/1.1 200
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Content-Type: application/json
+Transfer-Encoding: chunked
+Date: Mon, 28 Jul 2025 11:10:39 GMT
+
+1d
+{"status":"OK","commands":[]}
+0
+
+CZY ON TO MUSI W TAKIEJ POSTACI TO DAWAC

@@ -13,12 +13,12 @@ import java.time.LocalDateTime;
 
 public class TelemetryData{
     @Id
-    @GeneratedValue
     private Long id;
     @ManyToOne
     @JoinColumn(name = "device_id")
     private Device device;
     private String payload;
+    //TODO PAYLOAD - STATUS, DESIRED SPEED, CURRENT SPEED, DISTANCE, TIMETOEND, TIMEOFEND, AKU[V], WIATR, KIERUNEK WIATRU, CISNIENIE, TIME[ZWYKLY]
     @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private LocalDateTime timestamp;
 

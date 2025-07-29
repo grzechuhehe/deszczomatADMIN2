@@ -3,11 +3,11 @@ package org.deszczomatadmin2.controller;
 import org.deszczomatadmin2.dto.DeviceUploadRequest;
 import org.deszczomatadmin2.model.*;
 import org.deszczomatadmin2.repository.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -19,48 +19,57 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/telemetry")
 public class TelemetryController {
-    private final UserRepository userRepo;
-    private final TelemetryRepository telemetryRepo;
-    private final CommandRepository commandRepo;
-    private final DeviceSettingsRepository deviceSettingsRepo;
-    private final DeviceRepository deviceRepo;
-    private final BCryptPasswordEncoder passwordEncoder;
-
-    public TelemetryController(UserRepository userRepo, TelemetryRepository telemetryRepo, CommandRepository commandRepo, DeviceSettingsRepository deviceSettingsRepo, DeviceRepository deviceRepo) {
-        this.userRepo = userRepo;
-        this.telemetryRepo = telemetryRepo;
-        this.commandRepo = commandRepo;
-        this.deviceSettingsRepo = deviceSettingsRepo;
-        this.deviceRepo = deviceRepo;
-        this.passwordEncoder = new BCryptPasswordEncoder();
-    }
+    @Autowired private UserRepository userRepo;
+    @Autowired private TelemetryRepository telemetryRepo;
+    @Autowired private CommandRepository commandRepo;
+    @Autowired private DeviceSettingsRepository deviceSettingsRepo;
+    @Autowired private DeviceRepository deviceRepo;
 
     @PostMapping("/device-sync")
     public ResponseEntity<Map<String, Object>> deviceSync(@RequestBody DeviceUploadRequest req) {
         Optional<User> userOpt = userRepo.findByUsername(req.getUsername());
 
-        if (userOpt.isEmpty() || !passwordEncoder.matches(req.getPassword(), userOpt.get().getHashedPassword()))
+        if (userOpt.isEmpty() || !req.getPassword().equals(userOpt.get().getHashedPassword()))
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
         User user = userOpt.get();
-        if (!user.getRole().equals("DEVICE"))
+
+        //TODO WARUNEK DOSTĘPU ADMIN
+        if (!user.getRole().equals("DEVICE") && !user.getRole().equals("ADMIN"))
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 
         // Sprawdź czy urządzenie należy do użytkownika
         Optional<Device> deviceOpt = deviceRepo.findByDeviceId(req.getDeviceId());
-        if (deviceOpt.isEmpty() || !deviceOpt.get().getOwner().equals(user))
+
+        if (deviceOpt.isEmpty() || !deviceOpt.get().getOwner().getId().equals(user.getId()))
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Urządzenie nie należy do użytkownika"));
 
         Device device = deviceOpt.get();
 
         // Zapisz dane telemetryczne
         TelemetryData data = new TelemetryData();
-        data.setDevice(device);
+        data.setId(req.getDeviceId());
         data.setPayload(req.getPayload());
         data.setTimestamp(LocalDateTime.now());
         telemetryRepo.save(data);
 
         // Pobierz oczekujące komendy
+        //TODO - 1.WYSZUKAJ OSTATNIĄ NAJŚWIEŻSZĄ KOMENDE 2.SPRAWDZ CZY ZOSTAŁA WYSŁANA 3. JEŚLI TAK TO SPRAWDŹ CZY WYKONANA,
+        /** znajdź najświeższą komendę
+         if(lastcommandispresent){
+         if(command.checkwasSent){
+         if(command.getExectued) - JESZCZE BEZ TEGO{
+         tzn że ok i tyle
+         }
+         else{
+         if(
+         }
+         }
+         else{
+         send()
+         }
+
+         }*/
         List<Command> commands = commandRepo.findByDeviceIdAndExecutedFalse(device.getDeviceId());
         for (Command c : commands) c.setExecuted(true);
         commandRepo.saveAll(commands);
@@ -77,7 +86,6 @@ public class TelemetryController {
             }
         });
 
-        // Dodaj pozostałe komendy
         cmdList.addAll(commands.stream()
                 .map(c -> Map.of("commandPayload", c.getCommandPayload()))
                 .toList());
@@ -86,15 +94,15 @@ public class TelemetryController {
     }
 
     @GetMapping("/device/{deviceId}")
-    public ResponseEntity<List<TelemetryData>> getDeviceData(@PathVariable Long deviceId, Authentication auth) {
-        Optional<User> admin = userRepo.findByUsername(auth.getName());
-        if (admin.isEmpty() || !admin.get().getRole().equals("ADMIN")) {
+    public ResponseEntity<List<TelemetryData>> getDeviceData(@PathVariable String deviceId, @RequestParam String username, @RequestParam String password) {
+        Optional<User> userOpt = userRepo.findByUsername(username);
+        if (userOpt.isEmpty() || !password.equals(userOpt.get().getHashedPassword())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        User user = userOpt.get();
+        if (!user.getRole().equals("ADMIN")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        Optional<Device> deviceOpt = deviceRepo.findByDeviceId(deviceId);
-        if (deviceOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-        return ResponseEntity.ok(telemetryRepo.findByDevice(deviceOpt.get()));
+        return ResponseEntity.ok(telemetryRepo.findByDevice(deviceRepo.getReferenceById(Long.valueOf(deviceId))));
     }
 }

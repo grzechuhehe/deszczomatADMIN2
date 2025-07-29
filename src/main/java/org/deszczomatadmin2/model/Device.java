@@ -10,8 +10,9 @@ import lombok.*;
 
 public class Device{
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    //TODO NA STRINGA
     private Long deviceId;
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
