@@ -33,3 +33,8 @@ build/
 .vscode/
 
 *.properties
+
+.mvn
+mvnw
+mvnw.cmd
+maven-wrapper.properties
