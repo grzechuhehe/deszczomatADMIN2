@@ -26,6 +26,8 @@ public class TelemetryData {
     private Float windSpeed;
     private String windDirection;
     private Float pressure;
+
+    @Column(nullable = false, columnDefinition = "TIMESTAMPTZ")
     private LocalDateTime timestamp;
 
     @PrePersist
