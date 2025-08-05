@@ -27,7 +27,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/devices/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/devices/**").hasAnyRole("CLIENT", "ADMIN")
                         .requestMatchers("/api/commands/**").hasAnyRole("DEVICE", "ADMIN")
                         .requestMatchers("/telemetry/device-sync").hasAnyRole("DEVICE", "ADMIN")
                         .anyRequest().authenticated()

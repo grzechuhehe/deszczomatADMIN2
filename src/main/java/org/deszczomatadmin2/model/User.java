@@ -22,7 +22,7 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    //ADMIN,DEVICE,CLIENTS
+    //ROLE_ADMIN,ROLE_DEVICE,ROLE_CLIENT
     private String role;
 
     @OneToMany(mappedBy = "owner")

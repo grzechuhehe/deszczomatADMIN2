@@ -2,7 +2,7 @@ package org.deszczomatadmin2.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class TelemetryRequest {
+public class TelemetryDataDTO{
     @JsonProperty("did")
     public String deviceId;           // device.deviceId
     public String sta;          // status

@@ -18,12 +18,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@RestController
+@RestController("/command")
 public class CommandController {
 
     private final CommandRepository commandRepository;
     private final DeviceRepository deviceRepository;
-    private static final Logger log = LoggerFactory.getLogger(CommandController.class);
+//    private static final Logger log = LoggerFactory.getLogger(CommandController.class);
     private final UserRepository userRepository;
 
     public CommandController(CommandRepository commandRepository, DeviceRepository deviceRepository, UserRepository userRepository) {
@@ -46,38 +46,6 @@ public class CommandController {
 
         return ResponseEntity.ok(deviceIds);
     }
-
-    @GetMapping("api/admin/stats")
-    public ResponseEntity<Map<String, Long>> getStatistics() {
-        long userCount = userRepository.count();
-        long deviceCount = deviceRepository.count();
-
-        Map<String, Long> stats = Map.of(
-                "users", userCount,
-                "devices", deviceCount
-        );
-
-        return ResponseEntity.ok(stats);
-    }
-
-    @GetMapping("/api/admin/get_users")
-    public ResponseEntity<Map<String, Object>> getUsers() {
-        long userCount = userRepository.count();
-        List<String> usernames = userRepository.findAll()
-                .stream()
-                .map(User::getUsername)
-                .toList();
-
-        Map<String, Object> result = Map.of(
-                "userCount", userCount,
-                "usernames", usernames
-        );
-
-        return ResponseEntity.ok(result);
-    }
-
-
-
 
 
     @GetMapping("/api/commands/next")

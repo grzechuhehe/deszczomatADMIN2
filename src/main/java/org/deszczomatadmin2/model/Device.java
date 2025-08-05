@@ -15,17 +15,11 @@ public class Device{
 
     public Long getId() { return id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public void setId(Long id) { this.id = id; }
 
-    public String getDeviceId() {
-        return deviceId;
-    }
+    public String getDeviceId() { return deviceId; }
 
-    public void setDeviceId(String deviceId) {
-        this.deviceId = deviceId;
-    }
+    public void setDeviceId(String deviceId) { this.deviceId = deviceId; }
 
     public User getOwner() { return owner; }
 

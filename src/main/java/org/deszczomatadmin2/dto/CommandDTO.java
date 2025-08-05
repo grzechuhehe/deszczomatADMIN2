@@ -1,47 +1,16 @@
-package org.deszczomatadmin2.model;
-
-import jakarta.persistence.*;
-
+package org.deszczomatadmin2.dto;
 
 import java.time.LocalDateTime;
 
-@Entity
-public class Command {
+public class CommandDTO{
 
-    @Id
-    @GeneratedValue
     private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "deviceId", nullable = false)
-    private Device device;
-
+    private Long device_Id;
     private String commandPayload;
-
     private Integer commandNumber;
-
-    private boolean executed = false;
-
-    private int retryCount = 0;
-
+    private boolean executed;
+    private Integer retryCount;
     private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
-
-    public Integer getCommandNumber() { return commandNumber; }
-
-    public void setCommandNumber(Integer commandNumber) { this.commandNumber = commandNumber; }
-
-    public Device getDevice() {
-        return device;
-    }
-
-    public void setDevice(Device device) {
-        this.device = device;
-    }
 
     public Long getId() {
         return id;
@@ -49,6 +18,14 @@ public class Command {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getDevice_Id() {
+        return device_Id;
+    }
+
+    public void setDevice_Id(Long device_Id) {
+        this.device_Id = device_Id;
     }
 
     public String getCommandPayload() {
@@ -59,6 +36,14 @@ public class Command {
         this.commandPayload = commandPayload;
     }
 
+    public Integer getCommandNumber() {
+        return commandNumber;
+    }
+
+    public void setCommandNumber(Integer commandNumber) {
+        this.commandNumber = commandNumber;
+    }
+
     public boolean isExecuted() {
         return executed;
     }
@@ -67,11 +52,11 @@ public class Command {
         this.executed = executed;
     }
 
-    public int getRetryCount() {
+    public Integer getRetryCount() {
         return retryCount;
     }
 
-    public void setRetryCount(int retryCount) {
+    public void setRetryCount(Integer retryCount) {
         this.retryCount = retryCount;
     }
 
@@ -82,4 +67,9 @@ public class Command {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
+
+
 }
+
+
+

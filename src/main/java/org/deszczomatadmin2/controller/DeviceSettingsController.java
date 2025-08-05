@@ -28,4 +28,6 @@ public class DeviceSettingsController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+
+
 }

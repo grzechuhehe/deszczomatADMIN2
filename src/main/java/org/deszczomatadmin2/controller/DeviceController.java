@@ -1,7 +1,6 @@
 package org.deszczomatadmin2.controller;
 
-import org.deszczomatadmin2.dto.DeviceCreationRequest;
-import org.deszczomatadmin2.dto.DeviceUpdateRequest;
+import org.deszczomatadmin2.dto.DeviceDTO;
 import org.deszczomatadmin2.model.Device;
 import org.deszczomatadmin2.repository.DeviceRepository;
 import org.deszczomatadmin2.repository.UserRepository;
@@ -24,7 +23,7 @@ public class DeviceController {
     }
 
     @PostMapping
-    public ResponseEntity<Device> createDevice(@RequestBody DeviceCreationRequest request, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<Device> createDevice(@RequestBody DeviceDTO request, @AuthenticationPrincipal UserDetails userDetails) {
         return userRepository.findByUsername(userDetails.getUsername())
                 .map(user -> {
                     Device newDevice = new Device();
@@ -44,7 +43,7 @@ public class DeviceController {
     }
 
     @PutMapping("/{deviceId}")
-    public ResponseEntity<Device> updateDevice(@PathVariable String deviceId, @RequestBody DeviceUpdateRequest updatedDevice, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<Device> updateDevice(@PathVariable String deviceId, @RequestBody DeviceDTO updatedDevice, @AuthenticationPrincipal UserDetails userDetails) {
         return deviceRepository.findByDeviceIdAndOwnerUsername(deviceId, userDetails.getUsername())
                 .map(device -> {
                     device.setDeviceId(updatedDevice.getDeviceId());

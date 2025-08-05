@@ -1,6 +1,6 @@
 package org.deszczomatadmin2.controller;
 
-import org.deszczomatadmin2.dto.TelemetryRequest;
+import org.deszczomatadmin2.dto.TelemetryDataDTO;
 import org.deszczomatadmin2.model.Command;
 import org.deszczomatadmin2.model.Device;
 import org.deszczomatadmin2.model.TelemetryData;
@@ -41,7 +41,7 @@ public class TelemetryController {
 
     @PostMapping("/device-sync")
     public ResponseEntity<Void> uploadTelemetry(
-            @RequestBody TelemetryRequest dto,
+            @RequestBody TelemetryDataDTO dto,
             @AuthenticationPrincipal UserDetails userDetails) {
 
         Optional<Device> deviceOptional = deviceRepository.findByDeviceIdAndOwnerUsername(dto.deviceId, userDetails.getUsername());
