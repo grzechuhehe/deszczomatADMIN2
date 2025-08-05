@@ -8,4 +8,5 @@ import java.util.Optional;
 
 public interface CommandRepository extends JpaRepository<Command, Long> {
     Optional<Command> findFirstByDeviceAndExecutedIsFalseOrderByCreatedAtDesc(Device device);
+
 }

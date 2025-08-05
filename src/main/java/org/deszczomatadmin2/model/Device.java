@@ -7,8 +7,8 @@ public class Device{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    //TODO NA STRINGA
-    private Long deviceId;
+    @Column(name = "deviceId")
+    private String deviceId;
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User owner;
@@ -19,11 +19,11 @@ public class Device{
         this.id = id;
     }
 
-    public Long getDeviceId() {
+    public String getDeviceId() {
         return deviceId;
     }
 
-    public void setDeviceId(Long deviceId) {
+    public void setDeviceId(String deviceId) {
         this.deviceId = deviceId;
     }
 

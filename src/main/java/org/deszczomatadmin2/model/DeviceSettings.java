@@ -9,7 +9,7 @@ public class DeviceSettings {
     @GeneratedValue
     private Long id;
     @ManyToOne
-    @JoinColumn(name = "device_id", unique = true, nullable = false)
+    @JoinColumn(name = "did", unique = true, nullable = false)
     private Device device;
     private Double speedLimit;
     private boolean speedChangedPending;

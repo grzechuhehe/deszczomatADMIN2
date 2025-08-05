@@ -1,5 +1,6 @@
 package org.deszczomatadmin2.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -15,7 +16,6 @@ public class TelemetryData {
     @ManyToOne
     @JoinColumn(name = "device_id", nullable = false)
     private Device device;
-
     private String status;
     private Float desiredSpeed;
     private Float currentSpeed;

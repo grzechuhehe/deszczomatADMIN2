@@ -13,10 +13,20 @@ public class Command {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "device_id", nullable = false)
+    @JoinColumn(name = "deviceId", nullable = false)
     private Device device;
 
     private String commandPayload;
+
+    private Integer commandNumber;
+
+    public Integer getCommandNumber() {
+        return commandNumber;
+    }
+
+    public void setCommandNumber(Integer commandNumber) {
+        this.commandNumber = commandNumber;
+    }
 
     private boolean executed = false;
 

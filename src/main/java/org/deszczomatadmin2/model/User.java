@@ -22,6 +22,7 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    //ADMIN,DEVICE,CLIENTS
     private String role;
 
     @OneToMany(mappedBy = "owner")

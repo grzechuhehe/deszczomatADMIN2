@@ -27,8 +27,9 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/commands/**").hasRole("DEVICE")
-                        .requestMatchers("/api/telemetry/upload").hasRole("DEVICE")
+                        .requestMatchers("/api/devices/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/commands/**").hasAnyRole("DEVICE", "ADMIN")
+                        .requestMatchers("/telemetry/device-sync").hasAnyRole("DEVICE", "ADMIN")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
