@@ -5,10 +5,15 @@ import org.deszczomatadmin2.model.Device;
 import org.deszczomatadmin2.repository.DeviceRepository;
 import org.deszczomatadmin2.repository.UserRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/devices")
@@ -53,13 +58,30 @@ public class DeviceController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @DeleteMapping("/{deviceId}")
-    public ResponseEntity<Object> deleteDevice(@PathVariable String deviceId, @AuthenticationPrincipal UserDetails userDetails) {
-        return deviceRepository.findByDeviceIdAndOwnerUsername(deviceId, userDetails.getUsername())
-                .map(device -> {
-                    deviceRepository.delete(device);
-                    return ResponseEntity.noContent().build();
-                })
-                .orElse(ResponseEntity.notFound().build());
+    @PostMapping("/{id}")
+    public ResponseEntity<List<DeviceDTO>> deleteDevice(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        Optional<Device> optionalDevice = deviceRepository.findByIdAndOwnerUsername(id, userDetails.getUsername());
+
+        if (optionalDevice.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        deviceRepository.delete(optionalDevice.get());
+
+        List<DeviceDTO> userDevices = deviceRepository.findAll().stream()
+                .filter(device -> device.getOwner().getUsername().equals(userDetails.getUsername()))
+                .map(device -> new DeviceDTO(
+                        device.getId().intValue(),
+                        device.getDeviceId(),
+                        device.getOwner().getUsername()
+                ))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(userDevices);
     }
+
+
 }

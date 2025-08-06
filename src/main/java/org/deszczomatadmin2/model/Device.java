@@ -8,6 +8,7 @@ public class Device{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(name = "deviceId")
+    //TODO : String deviceName
     private String deviceId;
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

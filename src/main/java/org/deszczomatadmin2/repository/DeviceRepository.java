@@ -12,4 +12,7 @@ public interface DeviceRepository extends JpaRepository<Device, Long> {
     Optional<Device> findByDeviceIdAndOwnerUsername(String deviceId, String username);
     List<Device> findByOwner(User user);
 
+    List<Device> id(Long id);
+
+    Optional<Device> findByIdAndOwnerUsername(Long id, String username);
 }

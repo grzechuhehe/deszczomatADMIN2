@@ -2,13 +2,18 @@ package org.deszczomatadmin2.controller;
 
 import org.deszczomatadmin2.dto.DeviceDTO;
 import org.deszczomatadmin2.dto.UserDTO;
+import org.deszczomatadmin2.model.Device;
 import org.deszczomatadmin2.model.User;
 import org.deszczomatadmin2.repository.DeviceRepository;
 import org.deszczomatadmin2.repository.UserRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -81,20 +86,19 @@ public class AdminController{
 
 
     @GetMapping("/users/get-users")
-    public ResponseEntity<Map<String, Object>> getAllUsers() {
-        long userCount = userRepository.count();
-        List<String> usernames = userRepository.findAll()
+    public ResponseEntity<List<Map<String, Object>>> getAllUsernamesAndIds() {
+        List<Map<String, Object>> users = userRepository.findAll()
                 .stream()
-                .map(User::getUsername)
-                .toList();
-
-        Map<String, Object> result = Map.of(
-                "userCount", userCount,
-                "usernames", usernames
-        );
-
-        return ResponseEntity.ok(result);
+                .map(user -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("id", user.getId());
+                    map.put("username", user.getUsername());
+                    return map;
+                })
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(users);
     }
+
 
     @GetMapping("/devices/get-devices")
     public ResponseEntity<List<DeviceDTO>> getAllDevices() {
@@ -103,13 +107,29 @@ public class AdminController{
                 .collect(Collectors.toList()));
     }
 
-    @DeleteMapping("/users/{userId}")
+
+    @GetMapping("/devices/get-device/{userId}")
+    public ResponseEntity<List<DeviceDTO>> getAllUserDevices(@PathVariable Long userId) {
+        List<DeviceDTO> userDevices = deviceRepository.findAll().stream()
+                .filter(device -> device.getOwner().getId().equals(userId))
+                .map(device -> new DeviceDTO(
+                        device.getId().intValue(),
+                        device.getDeviceId(),
+                        device.getOwner().getUsername()
+                ))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(userDevices);
+    }
+
+
+    @DeleteMapping("/delete-user/{userId}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
         if(userRepository.existsById(userId)) {
             // Decide what to do with user's devices. For now, we'll just delete the user.
             // In a real app, you might want to reassign them or delete them.
             userRepository.deleteById(userId);
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
     }
@@ -120,6 +140,32 @@ public class AdminController{
                 .map(user -> ResponseEntity.ok(toUserDTO(user)))
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    @PostMapping("/devices/add-device")
+    public ResponseEntity<List<DeviceDTO>> createDevice(@RequestBody DeviceDTO request, @AuthenticationPrincipal UserDetails userDetails) {
+        return userRepository.findByUsername(userDetails.getUsername())
+                .map(user -> {
+                    Device newDevice = new Device();
+                    newDevice.setOwner(user);
+                    newDevice.setDeviceId(request.getDeviceId());
+                    deviceRepository.save(newDevice);
+
+                    List<DeviceDTO> userDevices = deviceRepository.findAll().stream()
+                            .filter(device -> device.getOwner().getId().equals(user.getId()))
+                            .map(device -> new DeviceDTO(
+                                    device.getId().intValue(),
+                                    device.getDeviceId(),
+                                    device.getOwner().getUsername()
+                            ))
+                            .collect(Collectors.toList());
+
+                    return new ResponseEntity<>(userDevices, HttpStatus.CREATED);
+                })
+                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+    }
+
+
+
 }
 
 
