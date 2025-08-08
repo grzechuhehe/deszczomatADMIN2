@@ -20,7 +20,11 @@ import org.springframework.web.bind.annotation.*;
 
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -82,6 +86,7 @@ public class TelemetryController {
             @RequestParam(required = false) String channel,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to,
+            @RequestParam(required = false) String resolution,
             @AuthenticationPrincipal UserDetails userDetails) {
 
         Optional<Device> deviceOptional = deviceRepository.findByIdAndOwnerUsername(id, userDetails.getUsername());
@@ -94,6 +99,11 @@ public class TelemetryController {
             List<TelemetryChartDataDTO> chartData = telemetryDataList.stream()
                     .map(data -> new TelemetryChartDataDTO(LocalDateTime.parse(data.getTimestamp()), getChannelValue(data, channel)))
                     .collect(Collectors.toList());
+
+            if (resolution != null && !resolution.equalsIgnoreCase("raw")) {
+                chartData = aggregateData(chartData, resolution);
+            }
+
             return ResponseEntity.ok(chartData);
         } else {
             List<TelemetryData> telemetryDataList = telemetryRepository.findByDevice_Id(id);
@@ -102,6 +112,42 @@ public class TelemetryController {
                     .collect(Collectors.toList());
             return ResponseEntity.ok(telemetryDataDTOList);
         }
+    }
+
+    private List<TelemetryChartDataDTO> aggregateData(List<TelemetryChartDataDTO> data, String resolution) {
+        if (data.isEmpty() || !(data.get(0).getValue() instanceof Integer)) {
+            return data; // Agregacja tylko dla danych numerycznych (Integer)
+        }
+
+        long intervalMinutes;
+        switch (resolution.toLowerCase()) {
+            case "15m":
+                intervalMinutes = 15;
+                break;
+            case "1h":
+                intervalMinutes = 60;
+                break;
+            case "1d":
+                intervalMinutes = 1440; // 24 * 60
+                break;
+            default:
+                return data; // Nieznana rozdzielczość, zwróć surowe dane
+        }
+
+        Map<LocalDateTime, List<Integer>> groupedData = data.stream()
+                .collect(Collectors.groupingBy(
+                        d -> d.getTimestamp().truncatedTo(ChronoUnit.MINUTES).withMinute(0).withSecond(0).withNano(0)
+                                .plusMinutes(intervalMinutes * (d.getTimestamp().getMinute() / intervalMinutes)),
+                        LinkedHashMap::new,
+                        Collectors.mapping(d -> (Integer) d.getValue(), Collectors.toList())
+                ));
+
+        return groupedData.entrySet().stream()
+                .map(entry -> {
+                    double average = entry.getValue().stream().mapToInt(Integer::intValue).average().orElse(0.0);
+                    return new TelemetryChartDataDTO(entry.getKey(), (int) Math.round(average));
+                })
+                .collect(Collectors.toList());
     }
 
     private Object getChannelValue(TelemetryData data, String channel) {
