@@ -127,6 +127,12 @@ public class TelemetryController {
             case "1h":
                 intervalMinutes = 60;
                 break;
+            case "3h":
+                intervalMinutes = 180;
+                break;
+            case "6h":
+                intervalMinutes = 360;
+                break;
             case "1d":
                 intervalMinutes = 1440; // 24 * 60
                 break;
