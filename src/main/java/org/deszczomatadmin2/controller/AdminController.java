@@ -64,7 +64,7 @@ public class AdminController{
         userDTO.setRole(user.getRole());
         if(user.getDevices() != null) {
             userDTO.setDevices(user.getDevices().stream()
-                    .map(device -> new DeviceDTO(device.getId().intValue(), device.getDeviceId(), device.getOwner().getUsername()))
+                    .map(device -> new DeviceDTO(device.getId().intValue(), device.getDeviceName(), device.getOwner().getUsername()))
                     .collect(Collectors.toList()));
         }
         return userDTO;
@@ -103,7 +103,7 @@ public class AdminController{
     @GetMapping("/devices/get-devices")
     public ResponseEntity<List<DeviceDTO>> getAllDevices() {
         return ResponseEntity.ok(deviceRepository.findAll().stream()
-                .map(device -> new DeviceDTO(device.getId().intValue(), device.getDeviceId(), device.getOwner().getUsername()))
+                .map(device -> new DeviceDTO(device.getId().intValue(), device.getDeviceName(), device.getOwner().getUsername()))
                 .collect(Collectors.toList()));
     }
 
@@ -114,7 +114,7 @@ public class AdminController{
                 .filter(device -> device.getOwner().getId().equals(userId))
                 .map(device -> new DeviceDTO(
                         device.getId().intValue(),
-                        device.getDeviceId(),
+                        device.getDeviceName(),
                         device.getOwner().getUsername()
                 ))
                 .collect(Collectors.toList());
@@ -147,14 +147,14 @@ public class AdminController{
                 .map(user -> {
                     Device newDevice = new Device();
                     newDevice.setOwner(user);
-                    newDevice.setDeviceId(request.getDeviceId());
+                    newDevice.setDeviceName(request.getDeviceName());
                     deviceRepository.save(newDevice);
 
                     List<DeviceDTO> userDevices = deviceRepository.findAll().stream()
                             .filter(device -> device.getOwner().getId().equals(user.getId()))
                             .map(device -> new DeviceDTO(
                                     device.getId().intValue(),
-                                    device.getDeviceId(),
+                                    device.getDeviceName(),
                                     device.getOwner().getUsername()
                             ))
                             .collect(Collectors.toList());

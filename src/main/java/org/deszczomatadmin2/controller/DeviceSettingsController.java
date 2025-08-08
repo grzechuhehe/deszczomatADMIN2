@@ -22,7 +22,7 @@ public class DeviceSettingsController {
 
     @GetMapping
     public ResponseEntity<DeviceSettings> getSettings(@PathVariable String deviceId, @AuthenticationPrincipal UserDetails userDetails) {
-        return deviceRepository.findByDeviceIdAndOwnerUsername(deviceId, userDetails.getUsername())
+        return deviceRepository.findByDeviceNameAndOwnerUsername(deviceId, userDetails.getUsername())
                 .flatMap(device -> deviceSettingsRepository.findByDeviceId(device.getId()))
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

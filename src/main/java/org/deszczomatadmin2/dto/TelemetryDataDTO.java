@@ -3,17 +3,19 @@ package org.deszczomatadmin2.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class TelemetryDataDTO{
+    public Long id;
     @JsonProperty("did")
-    public String deviceId;           // device.deviceId
-    public String sta;          // status
-    public Float spd_c;         // currentSpeed
-    public Float spd_d;         // desiredSpeed
-    public Float dis;           // distance
+    public String deviceName;           // device.deviceId
+    public Integer sta;          // status
+    public Integer spd_c;         // currentSpeed
+    public Integer spd_d;         // desiredSpeed
+    public Integer dis;           // distance
     public Integer toe;         // timeOfEnd (offset)
     public Integer tte;         // timeToEnd
-    public Float bat;           // akuVoltage
-    public Float wds;           // windSpeed
-    public String wdd;           // windDirection (degrees)
-    public Float ps;            // pressure
-    public Float alt;           // not used, can be logged
+    public Integer bat;           // akuVoltage
+    public Integer wds;           // windSpeed
+    public Integer wdd;           // windDirection (degrees)
+    public Integer ps;            // pressure
+    public Integer alt; // not used, can be logged
+    public String tmstmp;
 }

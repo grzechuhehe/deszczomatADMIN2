@@ -33,7 +33,7 @@ public class DeviceController {
                 .map(user -> {
                     Device newDevice = new Device();
                     newDevice.setOwner(user);
-                    newDevice.setDeviceId(request.getDeviceId());
+                    newDevice.setDeviceName(request.getDeviceName());
                     Device savedDevice = deviceRepository.save(newDevice);
                     return new ResponseEntity<>(savedDevice, HttpStatus.CREATED);
                 })
@@ -41,17 +41,17 @@ public class DeviceController {
     }
 
     @GetMapping("/{deviceId}")
-    public ResponseEntity<Device> getDevice(@PathVariable String deviceId, @AuthenticationPrincipal UserDetails userDetails) {
-        return deviceRepository.findByDeviceIdAndOwnerUsername(deviceId, userDetails.getUsername())
+    public ResponseEntity<Device> getDevice(@PathVariable String deviceName, @AuthenticationPrincipal UserDetails userDetails) {
+        return deviceRepository.findByDeviceNameAndOwnerUsername(deviceName, userDetails.getUsername())
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{deviceId}")
-    public ResponseEntity<Device> updateDevice(@PathVariable String deviceId, @RequestBody DeviceDTO updatedDevice, @AuthenticationPrincipal UserDetails userDetails) {
-        return deviceRepository.findByDeviceIdAndOwnerUsername(deviceId, userDetails.getUsername())
+    public ResponseEntity<Device> updateDevice(@PathVariable String deviceName, @RequestBody DeviceDTO updatedDevice, @AuthenticationPrincipal UserDetails userDetails) {
+        return deviceRepository.findByDeviceNameAndOwnerUsername(deviceName, userDetails.getUsername())
                 .map(device -> {
-                    device.setDeviceId(updatedDevice.getDeviceId());
+                    device.setDeviceName(updatedDevice.getDeviceName());
                     Device savedDevice = deviceRepository.save(device);
                     return ResponseEntity.ok(savedDevice);
                 })
@@ -75,7 +75,7 @@ public class DeviceController {
                 .filter(device -> device.getOwner().getUsername().equals(userDetails.getUsername()))
                 .map(device -> new DeviceDTO(
                         device.getId().intValue(),
-                        device.getDeviceId(),
+                        device.getDeviceName(),
                         device.getOwner().getUsername()
                 ))
                 .collect(Collectors.toList());

@@ -2,6 +2,7 @@ package org.deszczomatadmin2.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import jakarta.persistence.criteria.CriteriaBuilder;
 
 import java.time.LocalDateTime;
 
@@ -16,16 +17,26 @@ public class TelemetryData {
     @ManyToOne
     @JoinColumn(name = "device_id", nullable = false)
     private Device device;
-    private String status;
-    private Float desiredSpeed;
-    private Float currentSpeed;
-    private Float distance;
+    private Integer status;
+    private Integer desiredSpeed;
+    private Integer currentSpeed;
+    private Integer distance;
     private Integer timeToEnd;
-    private LocalDateTime timeOfEnd;
-    private Float akuVoltage;
-    private Float windSpeed;
-    private String windDirection;
-    private Float pressure;
+    private Integer timeOfEnd;
+    private Integer akuVoltage;
+    private Integer windSpeed;
+    private Integer windDirection;
+    private Integer pressure;
+
+    public Integer getAlert() {
+        return alert;
+    }
+
+    public void setAlert(Integer alert) {
+        this.alert = alert;
+    }
+
+    private Integer alert;
 
     @Column(nullable = false, columnDefinition = "TIMESTAMPTZ")
     private LocalDateTime timestamp;
@@ -51,35 +62,35 @@ public class TelemetryData {
         this.id = id;
     }
 
-    public String getStatus() {
+    public Integer getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Integer status) {
         this.status = status;
     }
 
-    public Float getDesiredSpeed() {
+    public Integer getDesiredSpeed() {
         return desiredSpeed;
     }
 
-    public void setDesiredSpeed(Float desiredSpeed) {
+    public void setDesiredSpeed(Integer desiredSpeed) {
         this.desiredSpeed = desiredSpeed;
     }
 
-    public Float getCurrentSpeed() {
+    public Integer getCurrentSpeed() {
         return currentSpeed;
     }
 
-    public void setCurrentSpeed(Float currentSpeed) {
+    public void setCurrentSpeed(Integer currentSpeed) {
         this.currentSpeed = currentSpeed;
     }
 
-    public Float getDistance() {
+    public Integer getDistance() {
         return distance;
     }
 
-    public void setDistance(Float distance) {
+    public void setDistance(Integer distance) {
         this.distance = distance;
     }
 
@@ -91,51 +102,52 @@ public class TelemetryData {
         this.timeToEnd = timeToEnd;
     }
 
-    public Float getWindSpeed() {
+    public Integer getWindSpeed() {
         return windSpeed;
     }
 
-    public void setWindSpeed(Float windSpeed) {
+    public void setWindSpeed(Integer windSpeed) {
         this.windSpeed = windSpeed;
     }
 
-    public LocalDateTime getTimeOfEnd() {
+    public Integer getTimeOfEnd() {
         return timeOfEnd;
     }
 
-    public void setTimeOfEnd(LocalDateTime timeOfEnd) {
+    public void setTimeOfEnd(Integer timeOfEnd) {
         this.timeOfEnd = timeOfEnd;
     }
 
-    public Float getAkuVoltage() {
+    public Integer getAkuVoltage() {
         return akuVoltage;
     }
 
-    public void setAkuVoltage(Float akuVoltage) {
+    public void setAkuVoltage(Integer akuVoltage) {
         this.akuVoltage = akuVoltage;
     }
 
-    public String getWindDirection() {
+    public Integer getWindDirection() {
         return windDirection;
     }
 
-    public void setWindDirection(String windDirection) {
+    public void setWindDirection(Integer windDirection) {
         this.windDirection = windDirection;
     }
 
-    public Float getPressure() {
+    public Integer getPressure() {
         return pressure;
     }
 
-    public void setPressure(Float pressure) {
+    public void setPressure(Integer pressure) {
         this.pressure = pressure;
     }
 
-    public LocalDateTime getTimestamp() {
-        return timestamp;
+    public String getTimestamp() {
+        return timestamp.toString();
     }
 
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
     }
+
 }

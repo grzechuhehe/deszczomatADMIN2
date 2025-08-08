@@ -2,12 +2,12 @@ package org.deszczomatadmin2.dto;
 
 public class DeviceDTO{
     private int id;
-    private String deviceId;
+    private String deviceName;
     private String ownerUsername;
 
-    public DeviceDTO(int id, String deviceId, String ownerUsername) {
+    public DeviceDTO(int id, String deviceName, String ownerUsername) {
         this.id = id;
-        this.deviceId = deviceId;
+        this.deviceName = deviceName;
         this.ownerUsername = ownerUsername;
     }
 
@@ -19,12 +19,12 @@ public class DeviceDTO{
         this.id = id;
     }
 
-    public String getDeviceId() {
-        return deviceId;
+    public String getDeviceName() {
+        return deviceName;
     }
 
-    public void setDeviceId(String deviceId) {
-        this.deviceId = deviceId;
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
     }
 
     public String getOwnerUsername() {
@@ -34,6 +34,7 @@ public class DeviceDTO{
     public void setOwnerUsername(String ownerUsername) {
         this.ownerUsername = ownerUsername;
     }
+
 
 
 }

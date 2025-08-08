@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface TelemetryRepository extends JpaRepository<TelemetryData, Long>{
     List<TelemetryData> findByDevice(Device device);
+    List<TelemetryData> findByDevice_Id(Long id);
 }

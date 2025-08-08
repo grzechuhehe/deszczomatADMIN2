@@ -14,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,10 +23,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/telemetry")
+@RequestMapping("telemetry")
 public class TelemetryController {
 
     private final TelemetryRepository telemetryRepository;
@@ -44,7 +48,7 @@ public class TelemetryController {
             @RequestBody TelemetryDataDTO dto,
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        Optional<Device> deviceOptional = deviceRepository.findByDeviceIdAndOwnerUsername(dto.deviceId, userDetails.getUsername());
+        Optional<Device> deviceOptional = deviceRepository.findByDeviceNameAndOwnerUsername(dto.deviceName, userDetails.getUsername());
 //        log.debug("hubert" +dto.deviceId);
         if (deviceOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -61,16 +65,52 @@ public class TelemetryController {
         telemetry.setCurrentSpeed(dto.spd_c);
         telemetry.setDesiredSpeed(dto.spd_d);
         telemetry.setDistance(dto.dis);
+        telemetry.setTimeOfEnd(dto.toe);
         telemetry.setTimeToEnd(dto.tte);
         telemetry.setAkuVoltage(dto.bat);
         telemetry.setWindSpeed(dto.wds);
         telemetry.setWindDirection(dto.wdd);
         telemetry.setPressure(dto.ps);
+        telemetry.setAlert(dto.alt);
         telemetry.setTimestamp(LocalDateTime.now());
 
         telemetryRepository.save(telemetry);
 
         return new ResponseEntity<>(headers, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<List<TelemetryDataDTO>> getTelemetryForDevice(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
+        Optional<Device> deviceOptional = deviceRepository.findByIdAndOwnerUsername(id, userDetails.getUsername());
+        if (deviceOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        List<TelemetryData> telemetryDataList = telemetryRepository.findByDevice_Id(id);
+        List<TelemetryDataDTO> telemetryDataDTOList = telemetryDataList.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(telemetryDataDTOList);
+    }
+
+    private TelemetryDataDTO convertToDto(TelemetryData telemetryData) {
+        TelemetryDataDTO dto = new TelemetryDataDTO();
+        dto.id = telemetryData.getId();
+        dto.deviceName = telemetryData.getDevice().getDeviceName();
+        dto.sta = telemetryData.getStatus();
+        dto.spd_c = telemetryData.getCurrentSpeed();
+        dto.spd_d = telemetryData.getDesiredSpeed();
+        dto.dis = telemetryData.getDistance();
+        dto.toe = telemetryData.getTimeOfEnd();
+        dto.tte = telemetryData.getTimeToEnd();
+        dto.bat = telemetryData.getAkuVoltage();
+        dto.wds = telemetryData.getWindSpeed();
+        dto.wdd = telemetryData.getWindDirection();
+        dto.ps = telemetryData.getPressure();
+        dto.alt = telemetryData.getAlert();
+        dto.tmstmp=telemetryData.getTimestamp();
+        return dto;
     }
 
     public HttpHeaders commandBuilder(String value) {

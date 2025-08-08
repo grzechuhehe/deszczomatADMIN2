@@ -7,9 +7,9 @@ public class Device{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "deviceId")
+    @Column(name = "deviceName")
     //TODO : String deviceName
-    private String deviceId;
+    private String deviceName;
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User owner;
@@ -18,9 +18,9 @@ public class Device{
 
     public void setId(Long id) { this.id = id; }
 
-    public String getDeviceId() { return deviceId; }
+    public String getDeviceName() { return deviceName; }
 
-    public void setDeviceId(String deviceId) { this.deviceId = deviceId; }
+    public void setDeviceName(String deviceId) { this.deviceName = deviceName; }
 
     public User getOwner() { return owner; }
 

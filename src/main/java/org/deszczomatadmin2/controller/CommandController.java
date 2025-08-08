@@ -41,7 +41,7 @@ public class CommandController {
 
         User user = userOpt.get();
         List<String> deviceIds = deviceRepository.findByOwner(user).stream()
-                .map(Device::getDeviceId)
+                .map(Device::getDeviceName)
                 .toList();
 
         return ResponseEntity.ok(deviceIds);
