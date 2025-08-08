@@ -1,5 +1,6 @@
 package org.deszczomatadmin2.controller;
 
+import org.deszczomatadmin2.dto.TelemetryChartDataDTO;
 import org.deszczomatadmin2.dto.TelemetryDataDTO;
 import org.deszczomatadmin2.model.Command;
 import org.deszczomatadmin2.model.Device;
@@ -9,17 +10,13 @@ import org.deszczomatadmin2.repository.DeviceRepository;
 import org.deszczomatadmin2.repository.TelemetryRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 import java.time.LocalDateTime;
@@ -80,19 +77,62 @@ public class TelemetryController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<List<TelemetryDataDTO>> getTelemetryForDevice(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<?> getTelemetryForDevice(
+            @PathVariable Long id,
+            @RequestParam(required = false) String channel,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
         Optional<Device> deviceOptional = deviceRepository.findByIdAndOwnerUsername(id, userDetails.getUsername());
         if (deviceOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        List<TelemetryData> telemetryDataList = telemetryRepository.findByDevice_Id(id);
-        List<TelemetryDataDTO> telemetryDataDTOList = telemetryDataList.stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(telemetryDataDTOList);
+        if (channel != null && from != null && to != null) {
+            List<TelemetryData> telemetryDataList = telemetryRepository.findByDeviceIdAndTimestampBetween(id, from, to);
+            List<TelemetryChartDataDTO> chartData = telemetryDataList.stream()
+                    .map(data -> new TelemetryChartDataDTO(LocalDateTime.parse(data.getTimestamp()), getChannelValue(data, channel)))
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(chartData);
+        } else {
+            List<TelemetryData> telemetryDataList = telemetryRepository.findByDevice_Id(id);
+            List<TelemetryDataDTO> telemetryDataDTOList = telemetryDataList.stream()
+                    .map(this::convertToDto)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(telemetryDataDTOList);
+        }
     }
+
+    private Object getChannelValue(TelemetryData data, String channel) {
+        switch (channel) {
+            case "bat":
+                return data.getAkuVoltage();
+            case "wds":
+                return data.getWindSpeed();
+            case "dis":
+                return data.getDistance();
+            case "ps":
+                return data.getPressure();
+            case "spd_c":
+                return data.getCurrentSpeed();
+            case "spd_d":
+                return data.getDesiredSpeed();
+            case "sta":
+                return data.getStatus();
+            case "toe":
+                return data.getTimeOfEnd();
+            case "tte":
+                return data.getTimeToEnd();
+            case "wdd":
+                return data.getWindDirection();
+            case "alt":
+                return data.getAlert();
+            default:
+                return null;
+        }
+    }
+
 
     private TelemetryDataDTO convertToDto(TelemetryData telemetryData) {
         TelemetryDataDTO dto = new TelemetryDataDTO();
