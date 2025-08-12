@@ -1,5 +1,8 @@
 package org.deszczomatadmin2.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.deszczomatadmin2.config.TelemetryWebSocketHandler;
 import org.deszczomatadmin2.dto.TelemetryChartDataDTO;
 import org.deszczomatadmin2.dto.TelemetryDataDTO;
 import org.deszczomatadmin2.model.Command;
@@ -31,12 +34,14 @@ public class TelemetryController {
     private final TelemetryRepository telemetryRepository;
     private final DeviceRepository deviceRepository;
     private final CommandRepository commandRepository;
+    private final TelemetryWebSocketHandler ws;
     private static final Logger log = LoggerFactory.getLogger(TelemetryController.class);
 
-    public TelemetryController(TelemetryRepository telemetryRepository, DeviceRepository deviceRepository, CommandRepository commandRepository) {
+    public TelemetryController(TelemetryRepository telemetryRepository, DeviceRepository deviceRepository, CommandRepository commandRepository, TelemetryWebSocketHandler ws) {
         this.telemetryRepository = telemetryRepository;
         this.deviceRepository = deviceRepository;
         this.commandRepository = commandRepository;
+        this.ws = ws;
     }
 
 
@@ -72,6 +77,13 @@ public class TelemetryController {
         telemetry.setTimestamp(LocalDateTime.now());
 
         telemetryRepository.save(telemetry);
+        try {
+            String json = new ObjectMapper().writeValueAsString(dto);
+            ws.sendTelemetryToUser(device.getOwner().getId(),json);
+        } catch(JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
 
         return new ResponseEntity<>(headers, HttpStatus.OK);
     }
