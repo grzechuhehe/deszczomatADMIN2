@@ -21,11 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -227,5 +223,47 @@ public class TelemetryController {
         }
         return null;
     }
+
+
+    @GetMapping("/all-data/{id}")
+    public ResponseEntity<?> getAllTelemetryForDevice(
+            @PathVariable Long id,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        // autoryzacja właściciela
+        if (deviceRepository.findByIdAndOwnerUsername(id, userDetails.getUsername()).isEmpty()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        // pobranie SUROWYCH danych (z opcjonalnym filtrem czasu)
+        log.debug("lukasz");
+        final List<TelemetryData> rows = (from != null && to != null)
+                ? telemetryRepository.findByDeviceIdAndTimestampBetween(id, from, to)
+                : telemetryRepository.findByDevice_Id(id);
+
+        List<TelemetryDataDTO> out = rows.stream()
+                .map(this::toMultiDto) // teraz poprawny typ wejściowy
+                .sorted(Comparator.comparing(TelemetryDataDTO::getTmstmp))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(out);
+    }
+
+    private TelemetryDataDTO toMultiDto(TelemetryData d) {
+        // dopasuj jeśli u Ciebie timestamp ma inny typ
+        LocalDateTime ts;
+        Object t = d.getTimestamp();
+        if (t instanceof LocalDateTime) {
+            ts = (LocalDateTime) t;
+        } else {
+            ts = LocalDateTime.parse(String.valueOf(t));
+        }
+
+        return new TelemetryDataDTO(d.getTimestamp(), d.getId(), d.getDevice().getDeviceName(), d.getStatus(), d.getDesiredSpeed(), d.getTimeOfEnd(),d.getCurrentSpeed(), d.getDistance(), d.getTimeToEnd(), d.getWindSpeed(), d.getAkuVoltage(), d.getWindDirection(), d.getPressure(), d.getAlert());
+
+    }
+
 
 }

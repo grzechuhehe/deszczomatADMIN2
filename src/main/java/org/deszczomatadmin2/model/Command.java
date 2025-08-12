@@ -13,7 +13,7 @@ public class Command {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "deviceName", nullable = false)
+    @JoinColumn(name = "device_id", nullable = false)
     private Device device;
 
     private String commandPayload;

@@ -29,7 +29,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/devices/**").hasAnyRole("CLIENT", "ADMIN")
                         .requestMatchers("/api/commands/**").hasAnyRole("DEVICE", "ADMIN")
-                        .requestMatchers("/telemetry/device-sync").hasAnyRole("DEVICE", "ADMIN")
+                        .requestMatchers("/telemetry/**").hasAnyRole("DEVICE", "ADMIN")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
