@@ -80,8 +80,29 @@ public class CommandController {
         return commandRepository.save(command);
     }
 
-    @GetMapping("api/adminapp")
-    public ResponseEntity<Command> getAdminApp(@AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok().build();
+    // DTO
+    public record DeviceBrief(Long id, String deviceId, String deviceName) {}
+    public record UserResponse(Long id, String username, String role, List<DeviceBrief> devices) {}
+
+    // Controller
+    @GetMapping("api/login")
+    public ResponseEntity<UserResponse> getAdminApp(@AuthenticationPrincipal UserDetails userDetails) {
+        return userRepository.findByUsername(userDetails.getUsername())
+                .map(u -> {
+                    List<DeviceBrief> devices = (u.getDevices() == null) ? List.of()
+                            : u.getDevices().stream()
+                            .map(d -> new DeviceBrief(d.getId(), d.getOwner().toString(), d.getDeviceName()))
+                            .toList();
+
+                    return ResponseEntity.ok(new UserResponse(
+                            u.getId(),
+                            u.getUsername(),
+                            u.getRole(),
+                            devices
+                    ));
+                })
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
+
+
 }

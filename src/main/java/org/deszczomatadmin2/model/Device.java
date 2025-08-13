@@ -20,7 +20,7 @@ public class Device{
 
     public String getDeviceName() { return deviceName; }
 
-    public void setDeviceName(String deviceId) { this.deviceName = deviceName; }
+    public void setDeviceName(String deviceId) { this.deviceName = deviceId; }
 
     public User getOwner() { return owner; }
 

@@ -5,6 +5,9 @@ public class DeviceDTO{
     private String deviceName;
     private String ownerUsername;
 
+    public DeviceDTO() {
+    }
+
     public DeviceDTO(int id, String deviceName, String ownerUsername) {
         this.id = id;
         this.deviceName = deviceName;

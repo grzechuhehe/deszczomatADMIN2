@@ -4,8 +4,9 @@ import org.deszczomatadmin2.dto.DeviceDTO;
 import org.deszczomatadmin2.model.Device;
 import org.deszczomatadmin2.repository.DeviceRepository;
 import org.deszczomatadmin2.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,24 +22,28 @@ public class DeviceController {
 
     private final DeviceRepository deviceRepository;
     private final UserRepository userRepository;
+    private static final Logger log = LoggerFactory.getLogger(DeviceController.class);
 
     public DeviceController(DeviceRepository deviceRepository, UserRepository userRepository) {
         this.deviceRepository = deviceRepository;
         this.userRepository = userRepository;
     }
 
-    @PostMapping
-    public ResponseEntity<Device> createDevice(@RequestBody DeviceDTO request, @AuthenticationPrincipal UserDetails userDetails) {
+    @PostMapping("/add-device")
+    public ResponseEntity<Object> createDevice(@RequestBody DeviceDTO request,
+                                               @AuthenticationPrincipal UserDetails userDetails) {
         return userRepository.findByUsername(userDetails.getUsername())
                 .map(user -> {
                     Device newDevice = new Device();
                     newDevice.setOwner(user);
                     newDevice.setDeviceName(request.getDeviceName());
-                    Device savedDevice = deviceRepository.save(newDevice);
-                    return new ResponseEntity<>(savedDevice, HttpStatus.CREATED);
+                    deviceRepository.save(newDevice);
+                    return ResponseEntity.ok().build(); // OK bez body
                 })
-                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()); // Nie OK
     }
+
+
 
     @GetMapping("/{deviceId}")
     public ResponseEntity<Device> getDevice(@PathVariable String deviceName, @AuthenticationPrincipal UserDetails userDetails) {
@@ -73,6 +78,20 @@ public class DeviceController {
 
         List<DeviceDTO> userDevices = deviceRepository.findAll().stream()
                 .filter(device -> device.getOwner().getUsername().equals(userDetails.getUsername()))
+                .map(device -> new DeviceDTO(
+                        device.getId().intValue(),
+                        device.getDeviceName(),
+                        device.getOwner().getUsername()
+                ))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(userDevices);
+    }
+
+    @GetMapping("/get-device/{userId}")
+    public ResponseEntity<List<DeviceDTO>> getAllUserDevices(@PathVariable Long userId) {
+        List<DeviceDTO> userDevices = deviceRepository.findAll().stream()
+                .filter(device -> device.getOwner().getId().equals(userId))
                 .map(device -> new DeviceDTO(
                         device.getId().intValue(),
                         device.getDeviceName(),

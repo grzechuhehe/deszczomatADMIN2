@@ -108,21 +108,6 @@ public class AdminController{
     }
 
 
-    @GetMapping("/devices/get-device/{userId}")
-    public ResponseEntity<List<DeviceDTO>> getAllUserDevices(@PathVariable Long userId) {
-        List<DeviceDTO> userDevices = deviceRepository.findAll().stream()
-                .filter(device -> device.getOwner().getId().equals(userId))
-                .map(device -> new DeviceDTO(
-                        device.getId().intValue(),
-                        device.getDeviceName(),
-                        device.getOwner().getUsername()
-                ))
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(userDevices);
-    }
-
-
     @DeleteMapping("/delete-user/{userId}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
         if(userRepository.existsById(userId)) {
@@ -141,28 +126,28 @@ public class AdminController{
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/devices/add-device")
-    public ResponseEntity<List<DeviceDTO>> createDevice(@RequestBody DeviceDTO request, @AuthenticationPrincipal UserDetails userDetails) {
-        return userRepository.findByUsername(userDetails.getUsername())
-                .map(user -> {
-                    Device newDevice = new Device();
-                    newDevice.setOwner(user);
-                    newDevice.setDeviceName(request.getDeviceName());
-                    deviceRepository.save(newDevice);
-
-                    List<DeviceDTO> userDevices = deviceRepository.findAll().stream()
-                            .filter(device -> device.getOwner().getId().equals(user.getId()))
-                            .map(device -> new DeviceDTO(
-                                    device.getId().intValue(),
-                                    device.getDeviceName(),
-                                    device.getOwner().getUsername()
-                            ))
-                            .collect(Collectors.toList());
-
-                    return new ResponseEntity<>(userDevices, HttpStatus.CREATED);
-                })
-                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
-    }
+//    @PostMapping("/devices/add-device")
+//    public ResponseEntity<List<DeviceDTO>> createDevice(@RequestBody DeviceDTO request, @AuthenticationPrincipal UserDetails userDetails) {
+//        return userRepository.findByUsername(userDetails.getUsername())
+//                .map(user -> {
+//                    Device newDevice = new Device();
+//                    newDevice.setOwner(user);
+//                    newDevice.setDeviceName(request.getDeviceName());
+//                    deviceRepository.save(newDevice);
+//
+//                    List<DeviceDTO> userDevices = deviceRepository.findAll().stream()
+//                            .filter(device -> device.getOwner().getId().equals(user.getId()))
+//                            .map(device -> new DeviceDTO(
+//                                    device.getId().intValue(),
+//                                    device.getDeviceName(),
+//                                    device.getOwner().getUsername()
+//                            ))
+//                            .collect(Collectors.toList());
+//
+//                    return new ResponseEntity<>(userDevices, HttpStatus.CREATED);
+//                })
+//                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+//    }
 
 
 
