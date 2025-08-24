@@ -2,17 +2,24 @@ package org.deszczomatadmin2;
 
 import org.deszczomatadmin2.model.User;
 import org.deszczomatadmin2.repository.UserRepository;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import javax.swing.*;
+import java.awt.*;
+
 @SpringBootApplication
 public class DeszczomatAdmin2Application {
 
     public static void main(String[] args) {
-        SpringApplication.run(DeszczomatAdmin2Application.class, args);
+        System.setProperty("java.awt.headless", "false");
+        SpringApplication app = new SpringApplication(DeszczomatAdmin2Application.class);
+        app.setHeadless(false); // bardzo ważne
+        app.run(args);
     }
 
     @Bean
@@ -26,5 +33,15 @@ public class DeszczomatAdmin2Application {
                 return userRepository.save(admin);
             });
         };
+    }
+
+    //TODO JAKIS LOG DLA JARA JAKO .TXT
+
+    @Bean
+    ApplicationRunner uiOnStart() {
+        return args -> EventQueue.invokeLater(() -> {
+            // małe potwierdzenie
+            JOptionPane.showMessageDialog(null, "Aplikacja wystartowała.\nAdres: http://localhost:8080");
+        });
     }
 }

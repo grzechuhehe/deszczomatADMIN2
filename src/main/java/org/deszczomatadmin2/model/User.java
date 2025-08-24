@@ -1,5 +1,6 @@
 package org.deszczomatadmin2.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -25,6 +26,7 @@ public class User implements UserDetails {
     //ROLE_ADMIN,ROLE_DEVICE,ROLE_CLIENT
     private String role;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "owner")
     private List<Device> devices;
 

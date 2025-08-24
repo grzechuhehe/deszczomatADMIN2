@@ -30,7 +30,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/devices/**").hasAnyRole("CLIENT", "ADMIN")
                         .requestMatchers("/api/commands/**").hasAnyRole("DEVICE", "ADMIN")
                         .requestMatchers("/telemetry/**").hasAnyRole("DEVICE", "ADMIN")
-                        .requestMatchers("/ws/telemetry/**").hasAnyRole("DEVICE", "ADMIN")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

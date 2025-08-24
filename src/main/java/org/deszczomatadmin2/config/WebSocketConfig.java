@@ -16,7 +16,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(telemetryWebSocketHandler, "/ws/telemetry")
+        registry.addHandler(telemetryWebSocketHandler, "/ws/telemetry/**")
                 .addInterceptors(authHandshakeInterceptor)
                 .setAllowedOrigins("*"); // w prod lepiej dać konkretne adresy
     }

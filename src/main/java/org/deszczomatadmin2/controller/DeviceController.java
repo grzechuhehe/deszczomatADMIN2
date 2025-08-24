@@ -52,9 +52,9 @@ public class DeviceController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/{deviceId}")
-    public ResponseEntity<Device> updateDevice(@PathVariable String deviceName, @RequestBody DeviceDTO updatedDevice, @AuthenticationPrincipal UserDetails userDetails) {
-        return deviceRepository.findByDeviceNameAndOwnerUsername(deviceName, userDetails.getUsername())
+    @PutMapping("/edit/{deviceId}")
+    public ResponseEntity<Device> updateDevice(@PathVariable Long deviceId, @RequestBody DeviceDTO updatedDevice, @AuthenticationPrincipal UserDetails userDetails) {
+        return deviceRepository.findByIdAndOwnerUsername(deviceId, userDetails.getUsername())
                 .map(device -> {
                     device.setDeviceName(updatedDevice.getDeviceName());
                     Device savedDevice = deviceRepository.save(device);

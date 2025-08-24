@@ -1,5 +1,6 @@
 package org.deszczomatadmin2.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 @Entity
@@ -8,8 +9,8 @@ public class Device{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(name = "deviceName")
-    //TODO : String deviceName
     private String deviceName;
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User owner;

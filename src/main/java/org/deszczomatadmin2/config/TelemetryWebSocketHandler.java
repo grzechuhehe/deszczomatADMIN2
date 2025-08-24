@@ -49,7 +49,7 @@ public class TelemetryWebSocketHandler implements WebSocketHandler {
     }
 
     private void removeSession(WebSocketSession session) {
-        String userId = (String) session.getAttributes().get("userId");
+        Long userId = (Long) session.getAttributes().get("userId");
         if (userId != null) {
             List<WebSocketSession> sessions = sessionsByUserId.get(userId);
             if (sessions != null) {
