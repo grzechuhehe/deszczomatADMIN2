@@ -6,9 +6,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface TelemetryRepository extends JpaRepository<TelemetryData, Long>{
     List<TelemetryData> findByDevice(Device device);
     List<TelemetryData> findByDevice_Id(Long id);
     List<TelemetryData> findByDeviceIdAndTimestampBetween(Long deviceId, LocalDateTime from, LocalDateTime to);
+    Optional<TelemetryData> findTopByDeviceIdOrderByTimestampDesc(Long deviceId);
 }

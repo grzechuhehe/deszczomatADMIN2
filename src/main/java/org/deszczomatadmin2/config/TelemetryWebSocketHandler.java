@@ -1,29 +1,85 @@
 package org.deszczomatadmin2.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.deszczomatadmin2.dto.TelemetryDataDTO;
+import org.deszczomatadmin2.model.TelemetryData;
+import org.deszczomatadmin2.repository.TelemetryRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Component
 public class TelemetryWebSocketHandler implements WebSocketHandler {
 
-    // Mapa userId do listy sesji
     private final ConcurrentHashMap<Long, CopyOnWriteArrayList<WebSocketSession>> sessionsByUserId = new ConcurrentHashMap<>();
+    private final TelemetryRepository telemetryRepository;
+    private final ObjectMapper objectMapper;
+
+    public TelemetryWebSocketHandler(TelemetryRepository telemetryRepository, ObjectMapper objectMapper) {
+        this.telemetryRepository = telemetryRepository;
+        this.objectMapper = objectMapper;
+    }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        Long userId = (Long)session.getAttributes().get("userId");
+        Long userId = (Long) session.getAttributes().get("userId");
         if (userId != null) {
             sessionsByUserId.computeIfAbsent(userId, k -> new CopyOnWriteArrayList<>()).add(session);
             System.out.println("Connected session for userId: " + userId);
+            sendLastTelemetryData(session);
         } else {
             session.close(CloseStatus.NOT_ACCEPTABLE.withReason("No userId"));
         }
     }
+
+    private void sendLastTelemetryData(WebSocketSession session) {
+        URI uri = session.getUri();
+        if (uri == null) {
+            return;
+        }
+
+        String path = uri.getPath();
+        String[] segments = path.split("/");
+        if (segments.length > 0) {
+            try {
+                Long deviceId = Long.parseLong(segments[segments.length - 1]);
+                Optional<TelemetryData> lastData = telemetryRepository.findTopByDeviceIdOrderByTimestampDesc(deviceId);
+
+                if (lastData.isPresent()) {
+                    TelemetryData data = lastData.get();
+                    TelemetryDataDTO dto = new TelemetryDataDTO(
+                            data.getTimestamp(),
+                            data.getId(),
+                            data.getDevice().getDeviceName(),
+                            data.getStatus(),
+                            data.getDesiredSpeed(),
+                            data.getTimeOfEnd(),
+                            data.getCurrentSpeed(),
+                            data.getDistance(),
+                            data.getTimeToEnd(),
+                            data.getWindSpeed(),
+                            data.getAkuVoltage(),
+                            data.getWindDirection(),
+                            data.getPressure(),
+                            data.getAlert()
+                    );
+                    String json = objectMapper.writeValueAsString(dto);
+                    session.sendMessage(new TextMessage(json));
+                }
+            } catch (NumberFormatException e) {
+                System.err.println("Could not parse deviceId from URI: " + path);
+            } catch (IOException e) {
+                System.err.println("Error sending last telemetry data: " + e.getMessage());
+            }
+        }
+    }
+
 
     @Override
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
