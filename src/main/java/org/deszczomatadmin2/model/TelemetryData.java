@@ -1,8 +1,11 @@
 package org.deszczomatadmin2.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
 import jakarta.persistence.criteria.CriteriaBuilder;
+import org.deszczomatadmin2.dto.TelemetryDataDTO;
 
 import java.time.LocalDateTime;
 
@@ -150,4 +153,27 @@ public class TelemetryData {
         this.timestamp = timestamp;
     }
 
+    public String getJsonString() {
+        TelemetryDataDTO dto = new TelemetryDataDTO();
+        dto.deviceName=device.getDeviceName();
+        dto.sta=status;
+        dto.spd_c=currentSpeed;
+        dto.spd_d=desiredSpeed;
+        dto.dis=distance;
+        dto.toe=timeOfEnd;
+        dto.tte=timeToEnd;
+        dto.bat=akuVoltage;
+        dto.wds=windSpeed;
+        dto.wdd=windDirection;
+        dto.ps=pressure;
+        dto.alt=alert;
+        dto.tmstmp=timestamp.toString();
+
+        try {
+            String json = new ObjectMapper().writeValueAsString(dto);
+            return json;
+        } catch(JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

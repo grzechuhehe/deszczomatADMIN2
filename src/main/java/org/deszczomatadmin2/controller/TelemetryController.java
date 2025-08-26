@@ -1,6 +1,7 @@
 package org.deszczomatadmin2.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.deszczomatadmin2.config.TelemetryWebSocketHandler;
 import org.deszczomatadmin2.dto.TelemetryChartDataDTO;
@@ -78,7 +79,14 @@ public class TelemetryController {
 
         telemetryRepository.save(telemetry);
         try {
-            String json = new ObjectMapper().writeValueAsString(dto);
+
+            dto.tmstmp=LocalDateTime.now().toString();
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, Object> map = objectMapper.convertValue(dto, new TypeReference<>() {});
+
+            // 3. dodaj deviceId
+            map.put("deviceId", device.getId());
+            String json = new ObjectMapper().writeValueAsString(map);
             ws.sendTelemetryToUser(device.getOwner().getId(),json);
         } catch(JsonProcessingException e) {
             throw new RuntimeException(e);
@@ -226,7 +234,7 @@ public class TelemetryController {
             Command cmd = commandOptional.get();
 
             // oznacz jako wykonane, jeśli trzeba
-            // cmd.setExecuted(true);
+            cmd.setExecuted(true);
             commandRepository.save(cmd);
 
             Integer command = cmd.getCommandNumber();

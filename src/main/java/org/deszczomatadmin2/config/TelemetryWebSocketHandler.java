@@ -1,8 +1,11 @@
 package org.deszczomatadmin2.config;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.deszczomatadmin2.dto.TelemetryDataDTO;
+import org.deszczomatadmin2.model.Device;
 import org.deszczomatadmin2.model.TelemetryData;
+import org.deszczomatadmin2.repository.DeviceRepository;
 import org.deszczomatadmin2.repository.TelemetryRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
@@ -10,6 +13,7 @@ import org.springframework.web.socket.*;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -19,24 +23,61 @@ public class TelemetryWebSocketHandler implements WebSocketHandler {
 
     private final ConcurrentHashMap<Long, CopyOnWriteArrayList<WebSocketSession>> sessionsByUserId = new ConcurrentHashMap<>();
     private final TelemetryRepository telemetryRepository;
+    private final DeviceRepository deviceRepository;
     private final ObjectMapper objectMapper;
 
-    public TelemetryWebSocketHandler(TelemetryRepository telemetryRepository, ObjectMapper objectMapper) {
+    public TelemetryWebSocketHandler(TelemetryRepository telemetryRepository, DeviceRepository deviceRepository, ObjectMapper objectMapper) {
         this.telemetryRepository = telemetryRepository;
         this.objectMapper = objectMapper;
+        this.deviceRepository = deviceRepository;
     }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         Long userId = (Long) session.getAttributes().get("userId");
-        if (userId != null) {
-            sessionsByUserId.computeIfAbsent(userId, k -> new CopyOnWriteArrayList<>()).add(session);
-            System.out.println("Connected session for userId: " + userId);
-            sendLastTelemetryData(session);
-        } else {
+        if (userId == null) {
             session.close(CloseStatus.NOT_ACCEPTABLE.withReason("No userId"));
+            return;
+        }
+
+        sessionsByUserId.computeIfAbsent(userId, k -> new CopyOnWriteArrayList<>()).add(session);
+        System.out.println("Connected session for userId: " + userId);
+
+        // 1) pobierz wszystkie urządzenia użytkownika
+        List<Device> devices = deviceRepository.findAllByOwnerId(userId);
+
+        // 2) dla każdego urządzenia wyślij najświeższy rekord telemetrii
+        for (Device device : devices) {
+            Optional<TelemetryData> latest =
+                    telemetryRepository.findTopByDeviceIdOrderByTimestampDesc(device.getId());
+            if (latest.isPresent()) {
+                TelemetryData t = latest.get();
+
+                try {
+                    // 1. pobierz oryginalny JSON jako String
+                    String telemetryJson = t.getJsonString();
+
+                    // 2. zdeserializuj do mapy
+                    ObjectMapper mapper = new ObjectMapper();
+                    Map<String, Object> map = mapper.readValue(telemetryJson, new TypeReference<>() {});
+
+                    // 3. dodaj deviceId
+                    map.put("deviceId", device.getId());
+
+                    // 4. zserializuj z powrotem do Stringa
+                    String finalJson = mapper.writeValueAsString(map);
+
+                    // 5. wyślij przez WebSocket
+                    sendTelemetryToUser(userId, finalJson);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
         }
     }
+
 
     private void sendLastTelemetryData(WebSocketSession session) {
         URI uri = session.getUri();
