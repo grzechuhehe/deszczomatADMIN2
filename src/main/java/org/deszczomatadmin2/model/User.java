@@ -30,6 +30,9 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "owner")
     private List<Device> devices;
 
+    @Column(nullable = false)
+    private Integer maxDevices = 3;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role));
@@ -95,5 +98,13 @@ public class User implements UserDetails {
 
     public void setDevices(List<Device> devices) {
         this.devices = devices;
+    }
+
+    public Integer getMaxDevices() {
+        return maxDevices;
+    }
+
+    public void setMaxDevices(Integer maxDevices) {
+        this.maxDevices = maxDevices;
     }
 }

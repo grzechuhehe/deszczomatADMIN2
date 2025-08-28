@@ -68,7 +68,15 @@ public class TelemetryWebSocketHandler implements WebSocketHandler {
                     String finalJson = mapper.writeValueAsString(map);
 
                     // 5. wyślij przez WebSocket
-                    sendTelemetryToUser(userId, finalJson);
+
+                    if (session.isOpen()) {
+                        try {
+                            session.sendMessage(new TextMessage(finalJson));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    //sendTelemetryToUser(userId, finalJson);
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -173,4 +181,6 @@ public class TelemetryWebSocketHandler implements WebSocketHandler {
             }
         }
     }
+
+
 }

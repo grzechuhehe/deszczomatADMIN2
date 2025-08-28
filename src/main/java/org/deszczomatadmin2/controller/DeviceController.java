@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+//import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -29,19 +30,49 @@ public class DeviceController {
         this.userRepository = userRepository;
     }
 
+//    @PostMapping("/add-device")
+//    public ResponseEntity<Object> createDevice(@RequestBody DeviceDTO request,
+//                                               @AuthenticationPrincipal UserDetails userDetails) {
+//        return userRepository.findByUsername(userDetails.getUsername())
+//                .map(user -> {
+//                    Device newDevice = new Device();
+//                    newDevice.setOwner(user);
+//                    newDevice.setDeviceName(request.getDeviceName());
+//                    deviceRepository.save(newDevice);
+//                    return ResponseEntity.ok().build(); // OK bez body
+//                })
+//                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()); // Nie OK
+//    }
+
     @PostMapping("/add-device")
     public ResponseEntity<Object> createDevice(@RequestBody DeviceDTO request,
                                                @AuthenticationPrincipal UserDetails userDetails) {
         return userRepository.findByUsername(userDetails.getUsername())
                 .map(user -> {
+                    // 1) policz urządzenia użytkownika
+                    long currentCount = deviceRepository.countByOwnerId(user.getId());
+                    Integer max = user.getMaxDevices(); // np. pole Integer w tabeli users
+
+                    // 2) jeżeli brak limitu w DB, potraktuj jako brak ograniczeń
+                    int maxAllowed = (max != null) ? max : Integer.MAX_VALUE;
+
+                    // 3) walidacja limitu
+                    if (currentCount >= maxAllowed) {
+                        return ResponseEntity.status(HttpStatus.CONFLICT).build();
+                    }
+
+                    // 4) utwórz urządzenie
                     Device newDevice = new Device();
                     newDevice.setOwner(user);
                     newDevice.setDeviceName(request.getDeviceName());
                     deviceRepository.save(newDevice);
-                    return ResponseEntity.ok().build(); // OK bez body
+
+                    // 5) odpowiedź (200 OK jak w Twojej wersji)
+                    return ResponseEntity.ok().build();
                 })
-                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()); // Nie OK
+                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
     }
+
 
 
 
