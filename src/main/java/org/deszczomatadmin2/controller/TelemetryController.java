@@ -51,7 +51,7 @@ public class TelemetryController {
             @RequestBody TelemetryDataDTO dto,
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        Optional<Device> deviceOptional = deviceRepository.findByDeviceNameAndOwnerUsername(dto.deviceName, userDetails.getUsername());
+        Optional<Device> deviceOptional = deviceRepository.findByIdAndOwnerUsername(dto.id, userDetails.getUsername());
 //        log.debug("hubert" +dto.deviceId);
         if (deviceOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -84,8 +84,6 @@ public class TelemetryController {
             ObjectMapper objectMapper = new ObjectMapper();
             Map<String, Object> map = objectMapper.convertValue(dto, new TypeReference<>() {});
 
-            // 3. dodaj deviceId
-            map.put("deviceId", device.getId());
             String json = new ObjectMapper().writeValueAsString(map);
             ws.sendTelemetryToUser(device.getOwner().getId(),json);
         } catch(JsonProcessingException e) {
@@ -205,7 +203,6 @@ public class TelemetryController {
     private TelemetryDataDTO convertToDto(TelemetryData telemetryData) {
         TelemetryDataDTO dto = new TelemetryDataDTO();
         dto.id = telemetryData.getId();
-        dto.deviceName = telemetryData.getDevice().getDeviceName();
         dto.sta = telemetryData.getStatus();
         dto.spd_c = telemetryData.getCurrentSpeed();
         dto.spd_d = telemetryData.getDesiredSpeed();
@@ -281,7 +278,7 @@ public class TelemetryController {
             ts = LocalDateTime.parse(String.valueOf(t));
         }
 
-        return new TelemetryDataDTO(d.getTimestamp(), d.getId(), d.getDevice().getDeviceName(), d.getStatus(), d.getDesiredSpeed(), d.getTimeOfEnd(),d.getCurrentSpeed(), d.getDistance(), d.getTimeToEnd(), d.getWindSpeed(), d.getAkuVoltage(), d.getWindDirection(), d.getPressure(), d.getAlert());
+        return new TelemetryDataDTO(d.getTimestamp(), d.getId(), d.getStatus(), d.getDesiredSpeed(), d.getTimeOfEnd(),d.getCurrentSpeed(), d.getDistance(), d.getTimeToEnd(), d.getWindSpeed(), d.getAkuVoltage(), d.getWindDirection(), d.getPressure(), d.getAlert());
 
     }
 

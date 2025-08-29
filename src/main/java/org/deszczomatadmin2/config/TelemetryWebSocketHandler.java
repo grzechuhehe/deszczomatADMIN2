@@ -57,21 +57,21 @@ public class TelemetryWebSocketHandler implements WebSocketHandler {
                     // 1. pobierz oryginalny JSON jako String
                     String telemetryJson = t.getJsonString();
 
-                    // 2. zdeserializuj do mapy
-                    ObjectMapper mapper = new ObjectMapper();
-                    Map<String, Object> map = mapper.readValue(telemetryJson, new TypeReference<>() {});
-
-                    // 3. dodaj deviceId
-                    map.put("deviceId", device.getId());
-
-                    // 4. zserializuj z powrotem do Stringa
-                    String finalJson = mapper.writeValueAsString(map);
+//                    // 2. zdeserializuj do mapy
+//                    ObjectMapper mapper = new ObjectMapper();
+//                    Map<String, Object> map = mapper.readValue(telemetryJson, new TypeReference<>() {});
+//
+//                    // 3. dodaj deviceId
+//                    map.put("deviceId", device.getId());
+//
+//                    // 4. zserializuj z powrotem do Stringa
+//                    String finalJson = mapper.writeValueAsString(map);
 
                     // 5. wyślij przez WebSocket
 
                     if (session.isOpen()) {
                         try {
-                            session.sendMessage(new TextMessage(finalJson));
+                            session.sendMessage(new TextMessage(telemetryJson));
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -105,7 +105,6 @@ public class TelemetryWebSocketHandler implements WebSocketHandler {
                     TelemetryDataDTO dto = new TelemetryDataDTO(
                             data.getTimestamp(),
                             data.getId(),
-                            data.getDevice().getDeviceName(),
                             data.getStatus(),
                             data.getDesiredSpeed(),
                             data.getTimeOfEnd(),

@@ -155,8 +155,8 @@ public class TelemetryData {
 
     public String getJsonString() {
         TelemetryDataDTO dto = new TelemetryDataDTO();
-        dto.deviceName=device.getDeviceName();
         dto.sta=status;
+        dto.id=device.getId();
         dto.spd_c=currentSpeed;
         dto.spd_d=desiredSpeed;
         dto.dis=distance;

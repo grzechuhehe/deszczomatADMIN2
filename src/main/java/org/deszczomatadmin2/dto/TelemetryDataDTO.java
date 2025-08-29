@@ -3,9 +3,8 @@ package org.deszczomatadmin2.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class TelemetryDataDTO{
-    public Long id;
     @JsonProperty("did")
-    public String deviceName;           // device.deviceId
+    public Long id;
     public Integer sta;          // status
     public Integer spd_c;         // currentSpeed
     public Integer spd_d;         // desiredSpeed
@@ -26,10 +25,9 @@ public class TelemetryDataDTO{
     public TelemetryDataDTO() {
     }
 
-    public TelemetryDataDTO(String tmstmp, Long id, String deviceName, Integer sta, Integer spd_d, Integer toe, Integer spd_c, Integer dis, Integer tte, Integer wds, Integer bat, Integer wdd, Integer ps, Integer alt) {
+    public TelemetryDataDTO(String tmstmp, Long id,  Integer sta, Integer spd_d, Integer toe, Integer spd_c, Integer dis, Integer tte, Integer wds, Integer bat, Integer wdd, Integer ps, Integer alt) {
         this.tmstmp = tmstmp;
         this.id = id;
-        this.deviceName = deviceName;
         this.sta = sta;
         this.spd_d = spd_d;
         this.toe = toe;

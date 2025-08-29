@@ -7,6 +7,7 @@ import org.deszczomatadmin2.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -49,29 +50,30 @@ public class DeviceController {
                                                @AuthenticationPrincipal UserDetails userDetails) {
         return userRepository.findByUsername(userDetails.getUsername())
                 .map(user -> {
-                    // 1) policz urządzenia użytkownika
                     long currentCount = deviceRepository.countByOwnerId(user.getId());
-                    Integer max = user.getMaxDevices(); // np. pole Integer w tabeli users
-
-                    // 2) jeżeli brak limitu w DB, potraktuj jako brak ograniczeń
+                    Integer max = user.getMaxDevices();
                     int maxAllowed = (max != null) ? max : Integer.MAX_VALUE;
 
-                    // 3) walidacja limitu
                     if (currentCount >= maxAllowed) {
                         return ResponseEntity.status(HttpStatus.CONFLICT).build();
                     }
 
-                    // 4) utwórz urządzenie
                     Device newDevice = new Device();
                     newDevice.setOwner(user);
                     newDevice.setDeviceName(request.getDeviceName());
-                    deviceRepository.save(newDevice);
 
-                    // 5) odpowiedź (200 OK jak w Twojej wersji)
-                    return ResponseEntity.ok().build();
+                    Device saved = deviceRepository.save(newDevice); // zapewnij ID
+
+                    String jsonString = String.format("{\"deviceId\": %d}", saved.getId());
+
+                    return ResponseEntity
+                            .status(HttpStatus.CREATED)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .body((Object) jsonString);
                 })
                 .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
     }
+
 
 
 

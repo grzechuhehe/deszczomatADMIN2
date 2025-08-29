@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 public class Device{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(unique = true)
     private Long id;
     @Column(name = "deviceName")
     private String deviceName;
